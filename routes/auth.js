@@ -17,7 +17,7 @@ router.post('/login', (req, res) => {
         if (result.length > 0) {
             const user = result[0]
             res.send(`Đăng nhập thành công ㄱㄱㄱ Xin chào ${user.username}
-                <br><a href="/change_password.html?user=${user.username}">Bấm vào đây để đổi mật khẩu</a></br>
+                <br><a href="/change_password.html?user=${user.username}">Bấm vào đây để đổi mật khẩu</a></br><br>
                 <a href='delete_account.html'>Bấm vào đây để xóa tài khoản</a>`)
         } else {
             res.send('Tài khoản hoặc mật khẩu không chính xác @@')
@@ -32,12 +32,14 @@ router.post('/register', (req, res) => {
     const checkUser = 'SELECT * FROM users where username = ?'
 
     db.query(checkUser, [username], (err, result) => {
-        if (err) return res.send('Lỗi')
+        if (err) {
+            return res.send('Lỗi')
+        }
         if (result.length > 0) {
             return res.send('Tài khoản đã tồn tại!!')
         }
 
-        const insertQuery = "INSERT INTO users (username, password) VALUES ('" + username + "', '" + password + "')"
+        const insertQuery = "INSERT INTO users (username, password, role) VALUES ('" + username + "', '" + password + "', 'user')"
         console.log(insertQuery)
         db.query(insertQuery, (err, result) => {
             if (err) {
@@ -51,9 +53,14 @@ router.post('/register', (req, res) => {
 
 router.post('/change-password', (req, res) => {
     const username = req.body.username;
+    const oldPassword = req.body.oldPassword;
     const newPassword = req.body.newPassword;
+    const confirmPassword = req.body.confirmPassword
 
-    const query = "UPDATE users SET password='" + newPassword + "' WHERE username='" + username + "'";
+    if (confirmPassword !== newPassword) {
+        return res.send("<h3 style='color:red'>Mật khẩu mới nhập lại không khớp!</h3>")
+    }
+    const query = "UPDATE users SET password='" + newPassword + "' WHERE username='" + username + "' AND password= '" + oldPassword + "'";
 
     console.log(query);
 
