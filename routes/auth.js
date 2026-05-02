@@ -12,7 +12,7 @@ router.post('/login', (req, res) => {
 
     db.query(query, (err, result) => {
         if (err) {
-            return res.send('Lỗi truy vấn SQL')
+            return res.send('Lỗi truy vấn SQL: ' + err.message)
         }
         if (result.length > 0) {
             const user = result[0]
@@ -95,5 +95,20 @@ router.post('/delete_account', (req, res) => {
         }
     })
 })
+
+router.get('/product', (req, res) => {
+    const id = req.query.id;
+    // Lỗ hổng nằm ở đây: cộng chuỗi trực tiếp
+    const query = "SELECT name, price FROM products WHERE id = '" + id + "'";
+
+    db.query(query, (err, result) => {
+        if (err) return res.send('Lỗi truy vấn SQL: ' + err.message);
+        if (result.length > 0) {
+            res.send(`Sản phẩm: ${result[0].name} | Giá: ${result[0].price}`);
+        } else {
+            res.send('Không tìm thấy sản phẩm');
+        }
+    });
+});
 module.exports = router;
 
